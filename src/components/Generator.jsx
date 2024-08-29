@@ -1,0 +1,183 @@
+import React, { useState } from "react";
+import SectionWrapper from "./SectionWrapper";
+import { SCHEMES, WORKOUTS } from "../utils/swoldier";
+import Button from "./Button";
+
+function Header({ index, title, description }) {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-center gap-2">
+        <p className="text-3xl sm:text-4xl md:text-5xl font-semibold text-slate-400">
+          {index}
+        </p>
+        <h4 className="text-xl sm:text-2xl md:text-3xl">{title}</h4>
+      </div>
+      <p className="text-sm sm:text-base mx-auto text-white">{description}</p>
+    </div>
+  );
+}
+
+export default function Generator(props) {
+  const {
+    muscles,
+    setMuscles,
+    poison,
+    setPoison,
+    goal,
+    setGoal,
+    updateWorkout,
+  } = props;
+  const [showModal, setShowModal] = useState(false);
+
+  function toggleModal() {
+    setShowModal(!showModal);
+  }
+  // function updateMuscles(muscleGroup) {
+  //   // Toggle the muscle group in the selection
+  //   if (muscles.includes(muscleGroup)) {
+  //     setMuscles(muscles.filter((val) => val !== muscleGroup));
+  //   } else {
+  //     setMuscles([...muscles, muscleGroup]);
+  //   }
+
+  //   if (muscles.length >= 3) {
+  //     return; // Prevent adding more than 3 muscle groups
+  //   }
+
+  //   // For non-individual options, only allow one muscle group selection
+  //   if (poison !== "individual") {
+  //     setMuscles([muscleGroup]);
+  //     return;
+  //   }
+  // }
+
+  function updateMuscles(muscleGroup) {
+    if (muscles.includes(muscleGroup)) {
+      setMuscles(muscles.filter((val) => val !== muscleGroup));
+      return;
+    }
+
+    if (muscles.length >= 3) {
+      return;
+    }
+    if (poison !== "individual") {
+      setMuscles([muscleGroup]);
+      setShowModal(false);
+      return;
+    }
+
+    setMuscles([...muscles, muscleGroup]);
+    if ((muscles, length === 3)) {
+      setShowModal(false);
+    }
+  }
+
+  // function updateMuscles(muscleGroup) {
+  //   if (muscles.includes(muscleGroup)) {
+  //     setMuscles(muscles.filter((val) => val !== muscleGroup));
+  //   } else if (muscles.length < 3) {
+  //     setMuscles([...muscles, muscleGroup]);
+  //   }
+  // }
+
+  return (
+    <SectionWrapper
+      id={"generate"}
+      header={"generate your workout"}
+      title={["It's", "Huge", "o'clock"]}
+    >
+      {/* Section 1: Pick Your Poison */}
+      <Header
+        index={"01"}
+        title={"Pick Your Poison"}
+        description={"Select the workout you would enjoy"}
+      />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {Object.keys(WORKOUTS).map((type) => (
+          <button
+            onClick={() => {
+              setMuscles([]);
+              setPoison(type);
+            }}
+            className={`bg-slate-950 border duration-200 px-4 hover:border-[#FFD700] py-3 rounded-lg ${
+              type === poison ? "border-[#FFD700]" : "border-white"
+            }`}
+            key={type}
+          >
+            <p className="capitalize hover:text-white">
+              {type.replaceAll("_", " ")}
+            </p>
+          </button>
+        ))}
+      </div>
+
+      {/* Section 2: Lock on Targets */}
+      <Header
+        index={"02"}
+        title={"Lock on targets"}
+        description={"Select the muscles judged for annihilation"}
+      />
+      <div className="bg-slate-950 border border-solid border-white rounded-lg flex flex-col">
+        <button
+          onClick={toggleModal}
+          className="relative p-3 flex items-center justify-center"
+        >
+          <p className="capitalize">
+            {muscles.length == 0 ? "Select Muscle Groups" : muscles.join(" ")}
+          </p>
+          <i className="fa-solid absolute right-3 top-1/2 -translate-y-1/2 fa-caret-down"></i>
+        </button>
+        {poison && WORKOUTS[poison] && (
+          <div className="flex flex-col p-3">
+            {(poison === "individual"
+              ? WORKOUTS[poison] // Directly map if it's an array
+              : Object.keys(WORKOUTS[poison])
+            ) // Get keys if it's an object
+              .map((muscleGroup, muscleGroupIndex) => (
+                <button
+                  key={muscleGroupIndex}
+                  onClick={() => {
+                    updateMuscles(muscleGroup);
+                  }}
+                >
+                  <p
+                    className={`uppercase text-white hover:text-[#FFD700] duration-200 ${
+                      muscles.includes(muscleGroup)
+                        ? "text-[#FFD700] !text-[#FFD700]"
+                        : ""
+                    }`}
+                  >
+                    {muscleGroup.replaceAll("_", " ")}
+                  </p>
+                </button>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Section 3: Become Juggernaut */}
+      <Header
+        index={"03"}
+        title={"Become Juggernaut"}
+        description={"Select your ultimate objective."}
+      />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {Object.keys(SCHEMES).map((scheme, schemeIndex) => (
+          <button
+            onClick={() => {
+              setGoal(scheme); // Set the clicked scheme as the goal
+            }}
+            className={
+              "bg-slate-950 border duration-200  hover:border-[#FFD700] py-3 rounded-lg px-4 " +
+              (scheme === goal ? "border-[#FFD700]" : "border-white") // Highlight the selected scheme
+            }
+            key={schemeIndex}
+          >
+            <p className="capitalize">{scheme.replaceAll("_", " ")}</p>
+          </button>
+        ))}
+      </div>
+      <Button func={updateWorkout} text={"Formulate"} />
+    </SectionWrapper>
+  );
+}
